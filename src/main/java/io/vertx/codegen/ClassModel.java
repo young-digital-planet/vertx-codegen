@@ -218,40 +218,6 @@ public class ClassModel implements Model {
   }
 
   protected void checkParamType(Element elem, TypeMirror type, TypeInfo typeInfo, int pos, int numParams) {
-
-    // Basic types, int, long, String etc
-    // JsonObject or JsonArray
-    // Also can use Object as a param type (e.g. for EventBus)
-    if (typeInfo.getKind().basic || typeInfo.getKind().json || typeInfo.getKind() == ClassKind.OBJECT) {
-      return;
-    }
-    // We also allow enums as parameter types
-    if (typeInfo.getKind() == ClassKind.ENUM) {
-      return;
-    }
-    // Check legal handlers
-    if (isLegalHandlerType(typeInfo)) {
-      return;
-    }
-    if (isLegalHandlerAsyncResultType(typeInfo)) {
-      return;
-    }
-    if (isLegalListSetMapParam(typeInfo)) {
-      return;
-    }
-    // Another user defined interface with the @VertxGen annotation is OK
-    if (isVertxGenInterface(typeInfo)) {
-      return;
-    }
-    // Can also specify option classes (which aren't VertxGen)
-    if (isDataObjectType(typeInfo)) {
-      return;
-    }
-    // We also allow type parameters for param types
-    if (isVariableType(typeInfo)) {
-      return;
-    }
-    throw new GenException(elem, "type " + typeInfo + " is not legal for use for a parameter in code generation");
   }
 
   protected void checkReturnType(ExecutableElement elem, TypeInfo type) {

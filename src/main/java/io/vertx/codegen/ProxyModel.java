@@ -56,47 +56,7 @@ public class ProxyModel extends ClassModel {
 
   @Override
   protected void checkParamType(Element elem, TypeMirror type, TypeInfo typeInfo, int pos, int numParams) {
-    // Basic types, int, long, String etc
-    // JsonObject or JsonArray
-    if (typeInfo.getKind().basic || typeInfo.getKind().json) {
-      return;
-    }
-    // We also allow enums as parameter types
-    if (typeInfo.getKind() == ClassKind.ENUM) {
-      return;
-    }
-    if (isLegalListSetMapParam(typeInfo)) {
-      return;
-    }
-    // We also allow data object as parameter types if they have a 'public JsonObject toJson()' method
-    if (typeInfo.getKind() == ClassKind.DATA_OBJECT) {
-      if (type instanceof DeclaredType) {
-        List<TypeInfo> list = ((DeclaredType) type).asElement().getEnclosedElements().stream()
-          .filter(e -> e.getKind() == ElementKind.METHOD)
-          .map(e -> (ExecutableElement) e)
-          .filter(e -> e.getParameters().size() == 0 && e.getSimpleName().toString().equals("toJson"))
-          .map(e -> typeFactory.create(e.getReturnType()))
-          .filter(ti -> ti.getKind() == ClassKind.JSON_OBJECT)
-          .collect(Collectors.toList());
 
-        if (list.size() == 1) { // we have our toJson method
-          return;
-        }
-
-        throw new GenException(elem, "type " + typeInfo + " does not have a valid 'public JsonObject toJson()' method.");
-      }
-    }
-    if (isLegalHandlerAsyncResultType(typeInfo)) {
-      if (pos != numParams - 1) {
-        throw new GenException(elem, "Handler<AsyncResult<T>> must be the last parameter if present in a proxied method");
-      }
-      return;
-    }
-    if (elem.getModifiers().contains(Modifier.STATIC)) {
-      // Ignore static methods - we won't use them anyway
-      return;
-    }
-    throw new GenException(elem, "type " + typeInfo + " is not legal for use for a parameter in proxy");
   }
 
   @Override
